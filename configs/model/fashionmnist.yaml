@@ -1,0 +1,32 @@
+_target_: src.models.fashionMNIST.FashionMNISTLitModule
+
+optimizer:
+  _target_: torch.optim.Adam
+  _partial_: true
+  lr: 0.001
+  weight_decay: 0.0
+
+scheduler:
+  _target_: torch.optim.lr_scheduler.ReduceLROnPlateau
+  _partial_: true
+  mode: min
+  factor: 0.1
+  patience: 10
+
+net:
+  # _target_: src.models.components.mlp.MLP
+  # _target_: src.models.components.cnn.CNN
+  # _target_: src.models.components.fashionCNN.FashionCNN
+  # _target_: src.models.components.VIT.ViT
+  _target_: src.models.components.VIT-small-dataset.ViT
+  image_size: 28
+  patch_size: 7
+  num_classes: 10
+  dim: 64
+  depth: 6
+  heads: 8
+  mlp_dim: 128
+  dropout: 0.1
+
+# compile model for faster training with pytorch 2.0
+compile: false
