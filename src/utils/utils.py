@@ -5,6 +5,7 @@ from typing import Any, Callable, Dict, Optional, Tuple
 from omegaconf import DictConfig
 
 from src.utils import pylogger, rich_utils
+from inspect import isfunction
 
 log = pylogger.RankedLogger(__name__, rank_zero_only=True)
 
@@ -117,3 +118,19 @@ def get_metric_value(metric_dict: Dict[str, Any], metric_name: Optional[str]) ->
     log.info(f"Retrieved metric value! <{metric_name}={metric_value}>")
 
     return metric_value
+
+def exists(x):
+    return x is not None
+
+def default(val, d):
+    if exists(val):
+        return val
+    return d() if isfunction(d) else d
+
+def num_to_groups(num, divisor):
+    groups = num // divisor
+    remainder = num % divisor
+    arr = [divisor] * groups
+    if remainder > 0:
+        arr.append(remainder)
+    return arr
