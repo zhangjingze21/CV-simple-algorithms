@@ -4,8 +4,12 @@ import torch
 from lightning import LightningModule
 from torchmetrics import MaxMetric, MeanMetric
 from torchmetrics.classification.accuracy import Accuracy
-
+import wandb
+import numpy as np
 from tqdm import tqdm
+
+import torchvision.utils as vutils
+
 
 from models.components.utils.utils_diffusion import (
     linear_beta_schedule,
@@ -26,6 +30,8 @@ from models.components.utils.utils_diffusion import (
     timesteps,
     p_sample_loop
 )
+
+import wandb
 
 from torch import nn
 from torch.nn import functional as F
@@ -104,7 +110,7 @@ class DiffusionLitModule(LightningModule):
             - A tensor of predictions.
             - A tensor of target labels.
         """
-        image, _ = batch
+        image, label = batch
         t = torch.randint(0, self.timesteps, (image.shape[0],), device=self.device)
         loss = self.p_losses(image, t, loss_type="huber")
         return loss 
@@ -146,11 +152,13 @@ class DiffusionLitModule(LightningModule):
         self.val_loss(loss)
         self.log("val/loss", self.val_loss, on_step=False, on_epoch=True, prog_bar=True)
 
-        # generate animate faces and output it to wandb
-        # sample 64 images
-        # todo: rewrite the below lines to enable cfg, I am too lazy now
-        # samples = self.sample()
-        # import ipdb; ipdb.set_trace()
+        if batch_idx == 0 and self.trainer.sanity_checking == False:
+            samples = self.sample(batch_size=64, channels=3, image_size=64)
+            # denormalize
+            samples = [((sample + 1) / 2) for sample in samples] # [-1, 1] -> [0, 1]
+            grid = vutils.make_grid(torch.tensor(samples[-1]), nrow=8, normalize=True)
+            wandb.log({"val/sample": [wandb.Image(grid)]})
+
 
     @torch.no_grad()
     def sample(

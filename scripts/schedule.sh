@@ -2,6 +2,5 @@
 # Schedule execution of many runs
 # Run from root folder with: bash scripts/schedule.sh
 
-python src/train.py trainer.max_epochs=5 logger=csv
+/home/stu5/anaconda3/envs/lightning/bin/python src/train.py trainer.max_epochs=100
 
-python src/train.py trainer.max_epochs=10 logger=csv
